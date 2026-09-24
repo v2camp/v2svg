@@ -37,7 +37,7 @@ v2svg 的做法是**让模型输出结构，而不是输出像素**，并在出�
       ↓
   Schema 校验         ← 字段合法性
       ↓
-  机械检查（25 项）    ← 标签遮挡、连边穿越、走廊歧义、对比度、文字描边、箭头契约…
+  机械检查（27 项）    ← 标签遮挡、连边穿越、走廊歧义、对比度、文字描边、箭头契约…
       ↓
   静态 SVG            ← 单文件，直接贴进文档
 ```
@@ -120,7 +120,7 @@ v2svg 的做法是**让模型输出结构，而不是输出像素**，并在出�
 
 **要点**：先定"域"再映射 `role`（一域一色）；组内节点 ≤ 4；带间关系让边指向**整组外框**，带内顺序用水平边表达。
 
-**可运行文件**：最小 IR 见 [`examples/ingestion-pipeline.architecture.json`](examples/ingestion-pipeline.architecture.json)；上面两张成品见 [`samples/order-system.architecture.json`](samples/order-system.architecture.json) 与 [`samples/sync-async-compare.architecture.json`](samples/sync-async-compare.architecture.json)。
+**可运行文件**：最小 IR 见 [`examples/log-ingest.architecture.json`](examples/log-ingest.architecture.json)；上面两张成品见 [`samples/order-system.architecture.json`](samples/order-system.architecture.json) 与 [`samples/sync-async-compare.architecture.json`](samples/sync-async-compare.architecture.json)。
 
 ### `flow` —— 流程 / 决策树 / Pipeline / 演进路线
 
@@ -136,7 +136,7 @@ v2svg 的做法是**让模型输出结构，而不是输出像素**，并在出�
 
 **要点**：`kind` ∈ `start` / `step` / `decision` / `terminal`；**不要环形布局**表达循环 —— 用阶段线性 + 回边，或改成交互式步骤说明。
 
-**可运行文件**：最小 IR 见 [`examples/agent-tool-call.flow.json`](examples/agent-tool-call.flow.json)；上面两张成品见 [`samples/ci-pipeline.flow.json`](samples/ci-pipeline.flow.json) 与 [`samples/alert-triage.flow.json`](samples/alert-triage.flow.json)。
+**可运行文件**：最小 IR 见 [`examples/deploy-gate.flow.json`](examples/deploy-gate.flow.json)；上面两张成品见 [`samples/ci-pipeline.flow.json`](samples/ci-pipeline.flow.json) 与 [`samples/alert-triage.flow.json`](samples/alert-triage.flow.json)。
 
 ### `sequence` —— 调用链 / 请求生命周期 / 参与者交互
 
@@ -264,7 +264,7 @@ svg render   <type> <input.json> <output.svg> [--quality standard|showcase] [--t
 
 - `<type>` ∈ `architecture` | `flow` | `sequence`
 - `--quality`：`standard` 19 项 / `showcase` 27 项（默认 `standard`）
-- `--theme`：`follow`（默认）亮色优先 + 宿主暗色自适应；`light` **固定亮色、不跟随宿主主题**——用于图要进 PDF / 截图 / 课程讲义等外观必须确定的场景。`light` 产物 **= `follow` 去掉暗色块**（逐字节相等，`tests/invariants.test.mjs` 固化）。
+- `--theme`：`follow`（默认）亮色优先 + 宿主暗色自适应；`light` **固定亮色、不跟随宿主主题**——用于图要进 PDF / 截图 / 印刷文档等外观必须确定的场景。`light` 产物 **= `follow` 去掉暗色块**（逐字节相等，`tests/invariants.test.mjs` 固化）。
 - `--json`：输出机器可读回执，含 `checks`、`composition.summary`、`artifact.sha256`
 - `validate` 与 `render` **跑同一批检查**（都会先渲染一份产物），故"validate 通过"等价于"render 会通过"
 
@@ -325,7 +325,7 @@ v2svg/
 ├── THIRD_PARTY_NOTICES.md       # 第三方代码声明（当前为空：全部自研）
 ├── package.json                 # { name, type: module, private: true }
 ├── bin/
-│   ├── v2svg.mjs              # CLI 入口（doctor / test / guide / validate / render）
+│   ├── svg.mjs                  # CLI 入口（doctor / test / guide / validate / render）
 │   └── guide-routing.mjs        # 分型判据：负向回流表 + 打分推荐 + 各类型最小规则
 ├── lib/
 │   ├── geometry.mjs             # 自研几何内核（8 个导出，行为由冻结基线锁定）
@@ -371,7 +371,8 @@ for f in samples/*.json; do :; done   # 若改动影响渲染，重渲染 sample
 还会影响**真实渲染结果**，需额外跑一次渲染级复核（需 headless Chromium）：
 
 ```bash
-NODE_PATH=$HOME/.workbuddy/binaries/node/workspace/node_modules \
+# 需可解析 playwright：把含 playwright 的 node_modules 交给 NODE_PATH（或已安装在依赖树中）
+NODE_PATH=/path/to/node_modules \
 node tests/verify-rendered-svg.tool.mjs
 ```
 
@@ -403,6 +404,7 @@ node tests/verify-rendered-svg.tool.mjs
 
 | 版本 | 变化 |
 |:---|:---|
+| **v0.1.8** | 去课程耦合，对齐通用架构图定位：示例/fewshot 中性化、`ref_reachable` 放宽相对图片路径、工具路径去本机硬编码、`checkDualTrackParity` → `checkVariantParity` |
 | **v0.1.7** | 画布边界计入**文本自身尺寸**（修「居中文字被切」）+ 新增 `content_within_canvas` 检查（26 → 27 项） |
 | **v0.1.6** | 新增构图检查 `entity_coverage`（25 → 26 项）：堵住「IR 声明了、产物里却没有」的**静默丢弃** |
 | **v0.1.5** | 去掉 vendored 的第三方几何内核，改为自研（本 skill 自此不含任何第三方代码）；行为由 1278 条冻结基线锁定 |
@@ -412,6 +414,18 @@ node tests/verify-rendered-svg.tool.mjs
 | **v0.1.0** | 首个版本：IR JSON → 自动布局 → 静态 SVG，三类型 + 机械验证 |
 
 ### 详细条目
+
+#### v0.1.8 —— 去课程耦合，定位通用架构图 skill
+
+技能原先从课程制作场景长出，文案例证与命名带有课程口径。本版将其对齐为**通用技术文档配图工具**：
+
+- 文档/注释中的「课程讲义」「原课程设计系统」「实战课 N 张」等改为通用表述（PDF / 印刷文档 / 分层图实测）。
+- `examples/` 去掉课程同温层域名：`agent-tool-call` → `deploy-gate`（发布门禁）、`ingestion-pipeline` → `log-ingest`（日志接入检索）；`evolution-roadmap` 改为「平台架构演进（单体→服务化）」；caption 去掉虚构「实测」数字。
+- design-system fewshot / 域映射表从中位课程项目（电商图谱 · 促销/会员/售后）改为「内容平台数据模型」等中性域名。
+- `ref_reachable` 从只认 `./images/*.svg` 放宽为相对路径图片引用（`./`/`../` × svg/png/jpg/gif/webp）。
+- 渲染级工具去掉本机 `workbuddy` / macOS 缓存硬编码：`NODE_PATH` 由调用方给出，chromium 交由 playwright 解析。
+- `checkDualTrackParity` 更名 `checkVariantParity`（能力不变，仅去掉双轨课程语义）。
+- 修正 rename 残留与口径漂移：目录树 `bin/v2svg.mjs` → `bin/svg.mjs`；管线图「25 项」→「27 项」；`diagram-spec` 修复优先级补全构图 12 项。
 
 #### v0.1.7 —— 画布边界计入文本尺寸 + `content_within_canvas`（26 → 27 项）
 

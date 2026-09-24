@@ -1,1 +1,1 @@
-{ "name": "v2svg", "version": "0.1.0", "private": true, "type": "module", "bin": { "svg": "./bin/svg.mjs" } }
+{ "name": "v2svg", "version": "0.1.8", "private": true, "type": "module", "bin": { "svg": "./bin/svg.mjs" } }

@@ -20,7 +20,7 @@
       "pattern": "^[a-z][a-z0-9-]{0,39}$"
     },
     "meta": {
-      "description": "图的元信息块（全类型共用）。title 必填；caption 为图号与实测口径；locale 默认 zh-CN；viewBox 默认 [800,500]。roleBudget 为语义域预算豁免：当一张图用到 > 3 个 role 时，必须给出理由并显式列出全部 role（见 `role_budget` 检查）。",
+      "description": "图的元信息块（全类型共用）。title 必填；caption 为图号与口径；locale 默认 zh-CN；viewBox 默认 [800,500]。roleBudget 为语义域预算豁免：当一张图用到 > 3 个 role 时，必须给出理由并显式列出全部 role（见 `role_budget` 检查）。",
       "type": "object",
       "additionalProperties": false,
       "required": ["title"],
@@ -31,7 +31,7 @@
         },
         "caption": {
           "type": "string",
-          "description": "图说明：图号与实测口径，例如「图 5-3 · 知识入库链路（实测 108 篇 → 243 条入库）」。"
+          "description": "图说明：图号与口径，例如「图 5-3 · 知识入库链路（质量门禁拦截待复核）」。"
         },
         "locale": {
           "type": "string",

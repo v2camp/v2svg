@@ -11,10 +11,10 @@
 
 | 业务域 | role | 色系 | 典型节点 |
 |:---|:---|:---|:---|
-| 数据域 / 可查询实体 | `interaction` | 蓝 | Product / Brand / Category |
-| 规则域 / 编排 / 状态 | `control` | 紫 | Promotion / MemberLevel / Router / Engine |
-| 能力域 / 组件 / 外部系统 | `capability` | 绿 | ServiceRule / Milvus / Repository |
-| 约束 / 拦截 / 失败路径 | `warn` | 橙红 | QualityGate / Guard / 降级出口 |
+| 数据域 / 可查询实体 | `interaction` | 蓝 | User / Order / Article |
+| 规则域 / 编排 / 状态 | `control` | 紫 | Router / Workflow / Policy |
+| 能力域 / 组件 / 外部系统 | `capability` | 绿 | Search / MQ / ObjectStorage |
+| 约束 / 拦截 / 失败路径 | `warn` | 橙红 | RateLimit / Guard / 降级出口 |
 | 中性说明 | `neutral` | 灰 | 日志 / 缓存 / 工具类 |
 
 **一条图内同一语义只用一种 role**，不要「这个实体用蓝、那个实体用绿」。
@@ -72,10 +72,10 @@ headless 浏览器实测佐证（§2.3）。
 
 | 位置 | 写法 | 例子 |
 |:---|:---|:---|
-| 节点 `label` | **英文名 + 中文名**（技术图可只留英文） | `Product 商品` |
-| 节点 `sublabel` | **规模 / 角色 / 关键属性**，≤ 18 字 | `50 个 SKU · 锚点` |
-| 边 `label` | **关系名 · 一句话说明**（说明可省，关系名不省） | `APPLIES_TO · scope=SKU 指向商品` |
-| `meta.title` | 图名，**不带序号** | `电商图谱数据模型` |
+| 节点 `label` | **英文名 + 中文名**（技术图可只留英文） | `Article 文章` |
+| 节点 `sublabel` | **规模 / 角色 / 关键属性**，≤ 18 字 | `3 千篇 · 锚点` |
+| 边 `label` | **关系名 · 一句话说明**（说明可省，关系名不省） | `APPLIES_TO · scope=文章 指向文章` |
+| `meta.title` | 图名，**不带序号** | `内容平台数据模型` |
 | `meta.caption` | `图 X-N · 图名（口径/用途）`——**会渲染在底部** | `图 5-2 · …（6 类节点 · 7 类关系边）` |
 
 底线：**删标签 = 删信息**。`label` 是语义数据，不是注释。
@@ -143,7 +143,8 @@ headless 浏览器实测佐证（§2.3）。
 内建检查全部基于**估算值**，无法证伪估算本身。真正的裁判是浏览器：
 
 ```bash
-NODE_PATH=$HOME/.workbuddy/binaries/node/workspace/node_modules \
+# 需可解析 playwright：把含 playwright 的 node_modules 交给 NODE_PATH（或已安装在依赖树中）
+NODE_PATH=/path/to/node_modules \
 node tests/verify-rendered-svg.tool.mjs          # 不给参数则校验 samples/*.svg
 ```
 
@@ -223,13 +224,13 @@ node tests/verify-rendered-svg.tool.mjs          # 不给参数则校验 samples
 
 | 症状 | 处理 |
 |:---|:---|
-| 画布过宽（节点标题展示 < 11px） | 单带节点 > 4 就按语义拆成两条带（例：Advisor 链按「请求方向 / 回程方向」拆，既收窄又更贴合"链是栈"的讲法） |
+| 画布过宽（节点标题展示 < 11px） | 单带节点 > 4 就按语义拆成两条带（例：调用链按「请求方向 / 回程方向」拆，既收窄又更贴合分层叙事） |
 | 画布过高（比例 < 0.8） | 把 1~2 节点的碎带合并（例：把 6 条步骤带合并成 3 条阶段带） |
 | 目标 | 比例收敛到 **1.0 ~ 1.6**；节点标题展示字号 ≥ 11px、组框标签 ≥ 10px |
 
 一律**按语义拆带 / 合带**，不缩字号。
 
-实测：实战课 8 张（均为分层图）按此体检后，比例由 0.42~3.09 收敛到 0.98~1.42，最宽 953px。
+实测：8 张分层图按此体检后，比例由 0.42~3.09 收敛到 0.98~1.42，最宽 953px。
 
 ---
 
@@ -242,40 +243,40 @@ node tests/verify-rendered-svg.tool.mjs          # 不给参数则校验 samples
   "schema_version": 1,
   "type": "architecture",
   "meta": {
-    "title": "电商图谱数据模型",
-    "caption": "图 5-2 · 电商图谱数据模型（6 类节点 · 7 类关系边；课6 以此做 0~2 跳关系召回）",
+    "title": "内容平台数据模型",
+    "caption": "图 5-2 · 内容平台数据模型（6 类节点 · 7 类关系边）",
     "locale": "zh-CN",
     "viewBox": [1100, 460]
   },
   "groups": [
     { "id": "data-domain", "label": "数据域 · 可查询实体", "role": "interaction" },
-    { "id": "rule-domain", "label": "规则域 · 促销 / 会员 / 售后", "role": "control" }
+    { "id": "rule-domain", "label": "规则域 · 发布 / 推荐 / 治理", "role": "control" }
   ],
   "nodes": [
-    { "id": "brand", "label": "Brand 品牌", "sublabel": "11 个品牌", "role": "interaction", "group": "data-domain" },
-    { "id": "product", "label": "Product 商品", "sublabel": "50 个 SKU · 锚点", "role": "interaction", "group": "data-domain" },
-    { "id": "category", "label": "Category 品类", "sublabel": "5 个品类", "role": "interaction", "group": "data-domain" },
-    { "id": "promotion", "label": "Promotion 促销", "sublabel": "13 个促销 · 锚点 · 带 note 边", "role": "control", "group": "rule-domain" },
-    { "id": "member", "label": "MemberLevel 会员", "sublabel": "2 级会员 · 锚点", "role": "control", "group": "rule-domain" },
-    { "id": "svc", "label": "ServiceRule 售后", "sublabel": "5 条售后规则", "role": "capability", "group": "rule-domain" }
+    { "id": "author", "label": "Author 作者", "sublabel": "120 位作者", "role": "interaction", "group": "data-domain" },
+    { "id": "article", "label": "Article 文章", "sublabel": "3 千篇 · 锚点", "role": "interaction", "group": "data-domain" },
+    { "id": "topic", "label": "Topic 专题", "sublabel": "18 个专题", "role": "interaction", "group": "data-domain" },
+    { "id": "publish", "label": "PublishPolicy 发布", "sublabel": "6 条策略 · 锚点 · 带 note 边", "role": "control", "group": "rule-domain" },
+    { "id": "rank", "label": "RankRule 推荐", "sublabel": "4 条排序 · 锚点", "role": "control", "group": "rule-domain" },
+    { "id": "mod", "label": "Moderation 治理", "sublabel": "9 条治理规则", "role": "capability", "group": "rule-domain" }
   ],
   "edges": [
-    { "from": "product", "to": "brand", "label": "MADE_BY · 商品由品牌制造", "kind": "data" },
-    { "from": "product", "to": "category", "label": "BELONGS_TO · 商品归属品类", "kind": "data" },
-    { "from": "promotion", "to": "product", "label": "APPLIES_TO · scope=SKU 指向商品", "kind": "sync" },
-    { "from": "promotion", "to": "category", "label": "OFFSETS · 以旧换新抵扣货款", "kind": "sync" },
-    { "from": "member", "to": "promotion", "label": "ENTITLES · 会员权益", "kind": "sync" },
-    { "from": "category", "to": "svc", "label": "GOVERNED_BY · 品类受售后约束", "kind": "data" }
+    { "from": "article", "to": "author", "label": "WRITTEN_BY · 文章由作者撰写", "kind": "data" },
+    { "from": "article", "to": "topic", "label": "BELONGS_TO · 文章归属专题", "kind": "data" },
+    { "from": "publish", "to": "article", "label": "APPLIES_TO · scope=文章 指向文章", "kind": "sync" },
+    { "from": "publish", "to": "topic", "label": "OFFSETS · 专题置顶抵扣常规流", "kind": "sync" },
+    { "from": "rank", "to": "publish", "label": "ENTITLES · 排序加权", "kind": "sync" },
+    { "from": "topic", "to": "mod", "label": "GOVERNED_BY · 专题受治理约束", "kind": "data" }
   ]
 }
 ```
 
 **这张例子为什么这样写**（照抄这几条就能少返工）：
 
-- **先定域再上色**：数据域=蓝（interaction）、规则域=紫（control）、售后规则=绿（capability）——同一个「域」内的节点 role 一致。
-- **两个 group 就是两行**：数据域在上、规则域在下；`product → brand/category` 在同带内，`category → svc` 向下走一带，都不跨行。
-- **节点副标签给规模**（`50 个 SKU · 锚点`），读者不必回正文找数量。
-- **边标签带说明**（`OFFSETS · 以旧换新抵扣货款`），一条边自解释。
+- **先定域再上色**：数据域=蓝（interaction）、规则域=紫（control）、治理规则=绿（capability）——同一个「域」内的节点 role 一致。
+- **两个 group 就是两行**：数据域在上、规则域在下；`article → author/topic` 在同带内，`topic → mod` 向下走一带，都不跨行。
+- **节点副标签给规模**（`3 千篇 · 锚点`），读者不必回正文找数量。
+- **边标签带说明**（`OFFSETS · 专题置顶抵扣常规流`），一条边自解释。
 - **口径放 caption**：会渲染成底部图注，替代额外的「说明条」节点。
 
 ---

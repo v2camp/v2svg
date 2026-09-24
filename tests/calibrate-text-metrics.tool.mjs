@@ -2,8 +2,8 @@
 // 并评估「新分类系数表」与「旧的单一 0.55 系数」相对实测宽度的误差。
 //
 // 用法：
-//   NODE_PATH=~/.workbuddy/binaries/node/workspace/node_modules \
-//   node temp/calibrate-text-metrics.mjs
+//   NODE_PATH=/path/to/node_modules \
+//   node tests/calibrate-text-metrics.tool.mjs
 import { createRequire } from 'node:module';
 import { globSync } from 'node:fs';
 

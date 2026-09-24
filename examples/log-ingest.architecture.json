@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "type": "architecture",
+  "meta": {
+    "title": "日志接入与检索链路",
+    "caption": "图 5-3 · 日志接入检索链路（质量门禁拦截待复核）",
+    "locale": "zh-CN",
+    "viewBox": [800, 500]
+  },
+  "groups": [
+    { "id": "access-layer", "label": "接入层", "role": "interaction" },
+    { "id": "write-layer", "label": "写入层", "role": "capability" }
+  ],
+  "nodes": [
+    { "id": "src-file", "label": "FileTailer", "sublabel": "本地日志", "role": "capability", "group": "access-layer" },
+    { "id": "src-syslog", "label": "SyslogIngest", "sublabel": "syslog/514", "role": "capability", "group": "access-layer" },
+    { "id": "loader", "label": "LogNormalizer", "sublabel": "统一日志对象", "role": "capability", "group": "access-layer" },
+    { "id": "gate", "label": "QualityGate", "sublabel": "质量门禁·拦截", "role": "warn", "group": "access-layer" },
+    { "id": "quarantine", "label": "Quarantine", "sublabel": "待人工复核", "role": "capability", "group": "write-layer" },
+    { "id": "dual-write", "label": "DualWriter", "sublabel": "双库写入", "role": "interaction", "group": "write-layer" },
+    { "id": "search", "label": "Elasticsearch", "sublabel": "全文检索", "role": "capability", "group": "write-layer" },
+    { "id": "object", "label": "ObjectStorage", "sublabel": "冷存归档", "role": "capability", "group": "write-layer" }
+  ],
+  "edges": [
+    { "from": "src-file", "to": "loader", "label": "读取", "kind": "data" },
+    { "from": "src-syslog", "to": "loader", "label": "读取", "kind": "data" },
+    { "from": "loader", "to": "gate", "label": "日志对象", "kind": "sync" },
+    { "from": "gate", "to": "dual-write", "label": "通过", "kind": "sync" },
+    { "from": "gate", "to": "quarantine", "label": "拦截待复核", "kind": "async" },
+    { "from": "dual-write", "to": "search", "label": "索引", "kind": "data" },
+    { "from": "dual-write", "to": "object", "label": "归档", "kind": "data" }
+  ]
+}

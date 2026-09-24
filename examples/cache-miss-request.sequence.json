@@ -3,7 +3,7 @@
   "type": "sequence",
   "meta": {
     "title": "缓存未命中的请求时序",
-    "caption": "图 4-1 · 缓存未命中请求时序（实测 p99 18ms，命中率 92%）",
+    "caption": "图 4-1 · 缓存未命中请求时序（回源后回填缓存）",
     "locale": "zh-CN",
     "viewBox": [800, 500]
   },

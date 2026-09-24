@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "type": "flow",
+  "meta": {
+    "title": "发布门禁流程",
+    "caption": "图 7-2 · 发布门禁流程（含校验失败重试回边）",
+    "locale": "zh-CN",
+    "viewBox": [800, 500]
+  },
+  "nodes": [
+    { "id": "submit", "label": "提交变更", "sublabel": "ChangeRequest", "role": "interaction", "kind": "start" },
+    { "id": "gate", "label": "门禁判定", "sublabel": "PolicyGate", "role": "control", "kind": "decision" },
+    { "id": "build", "label": "构建验证", "sublabel": "BuildPipeline", "role": "capability", "kind": "step" },
+    { "id": "check", "label": "结果校验", "sublabel": "ResultChecker", "role": "control", "kind": "decision" },
+    { "id": "release", "label": "发布上线", "sublabel": "Release", "role": "interaction", "kind": "terminal" }
+  ],
+  "edges": [
+    { "from": "submit", "to": "gate", "label": "变更单", "kind": "sync" },
+    { "from": "gate", "to": "build", "label": "通过门禁", "kind": "sync" },
+    { "from": "build", "to": "check", "label": "构建产物", "kind": "sync" },
+    { "from": "check", "to": "release", "label": "校验通过", "kind": "sync" },
+    { "from": "check", "to": "build", "label": "校验失败·重试", "kind": "fallback" }
+  ]
+}

@@ -94,7 +94,7 @@ function resolveQuality(raw) {
 
 // 'follow'（默认）= :root 亮色 + prefers-color-scheme 暗色自适应，跟随宿主主题。
 // 'light' = 固定亮色，**不跟随宿主主题**；用于「图必须与读者主题无关」的嵌入场景
-//   （如课程讲义配图、要进 PDF/截图流转的图）。
+//   （如文档/印刷物配图、要进 PDF/截图流转的图）。
 function resolveTheme(raw) {
   const t = raw || 'follow';
   if (t !== 'follow' && t !== 'light') {

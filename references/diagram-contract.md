@@ -81,7 +81,7 @@ schema 层（`validateSchema`）产出的诊断。携带 `subject` / `evidence` 
 | `text_no_stroke` | 内联样式含 `text { stroke: none; }`，且无 `<text>` 带非 none 描边 | 文字被分组 role 色描边污染（发蓝/发紫/发糊），对比度类检查查不出 | 检查 `lib/theme.mjs` 的 baseCss 是否保留该规则 |
 | `marker_contract` | 箭头 marker 三向闭合：`url(#x)` 引用都有定义、defs 里没有契约外的 marker、契约里的 marker 全部被定义 | 任一侧改名即**静默失效**（Chrome 对不可达引用不报错，只是不画箭头） | 改 `lib/markers.mjs` 的 `ARROW_MARKER_IDS` / `MARKER_SHAPES` / `EDGE_STYLE`，勿在别处硬编码 id |
 | `svg_text_fits` | **产物级**：盒内文案估算宽 ≤ 盒可用内宽；遮罩宽高足以覆盖文案；且渲染字号 = `TYPE_SCALE` | 跨模块常量错位（如 theme 改了字号、render 用了另一个字号算遮罩 / 多算了偏移） | 对齐 `lib/typography.mjs` 与 `lib/theme.mjs`；再跑 `tests/verify-rendered-svg.tool.mjs` 复核 |
-| `ref_reachable` | Markdown 的 `./images/*.svg` 引用均存在 | 引用缺失 | 补图或修 Markdown 引用 |
+| `ref_reachable` | Markdown 的相对图片引用（`./` 或 `../`，svg/png/jpg/gif/webp）均存在 | 引用缺失 | 补图或修 Markdown 引用 |
 | `caption_present` | `meta.caption` 形如 `图 X-N · 标题` 且图号不重复 | 图题缺失/格式错/图号重复 | 补 `meta.caption`；跨文件去重 |
 | `theme_readable` | 用到的 role 在明/暗两套 token 下文字对比度 ≥ 4.5:1 | 配色对比度不足 | 回查 `role` 选用与 token |
 | `variant_parity` | 多版本目录的 `images/*.svg` 文件名集合一致（仅 `--variant-pair` 启用） | 版本间图不对齐 | 对齐各版本图文件 |

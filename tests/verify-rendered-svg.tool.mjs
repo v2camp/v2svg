@@ -7,9 +7,10 @@
 // 或 lib/render.mjs 后**必须**跑一次本工具。
 //
 // 用法（不给参数时自动校验 samples/*.svg）：
-//   NODE_PATH=$HOME/.workbuddy/binaries/node/workspace/node_modules \
+//   NODE_PATH=/path/to/node_modules \
 //   node tests/verify-rendered-svg.tool.mjs [<a.svg> ...]
 // 环境变量 TOL 可放宽容差（默认 0，即必须完全在盒内）。
+// 需可解析 playwright（chromium），浏览器由 playwright 自行解析，不绑定本机缓存路径。
 import { createRequire } from 'node:module';
 import { globSync, readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -20,16 +21,12 @@ let chromium;
 try { ({ chromium } = require('playwright')); }
 catch (e) { console.error('无法加载 playwright：', e.message); process.exit(2); }
 
-const base = `${process.env.HOME}/Library/Caches/ms-playwright`;
-const exes = globSync(`${base}/chromium_headless_shell-*/chrome-headless-shell-mac-*/chrome-headless-shell`);
-if (!exes.length) { console.error('未找到 chromium headless shell。'); process.exit(2); }
-
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 let files = process.argv.slice(2);
 if (!files.length) files = globSync(path.join(HERE, '..', 'samples', '*.svg')).sort();
 if (!files.length) { console.error('用法：node verify-rendered-svg.tool.mjs <a.svg> [...]'); process.exit(2); }
 
-const browser = await chromium.launch({ executablePath: exes.sort().pop() });
+const browser = await chromium.launch();
 const page = await browser.newPage();
 const TOL = Number(process.env.TOL || 0);
 
