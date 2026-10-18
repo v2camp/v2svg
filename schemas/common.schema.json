@@ -56,6 +56,11 @@
             "reason": { "type": "string", "minLength": 8 },
             "roles": { "type": "array", "minItems": 4, "items": { "$ref": "#/$defs/role" } }
           }
+        },
+        "allowPortrait": {
+          "type": "string",
+          "minLength": 8,
+          "description": "竖向长条豁免理由（≥8 字符）：flow 图成品高宽比 > 1.2 且节点 ≥ 4 时，portrait_strip 检查要求改 layout:horizontal；确需竖向（如强调纵深层级）在此写明理由。"
         }
       }
     }

@@ -1,13 +1,13 @@
 ---
 name: v2svg
-version: 0.2.1
-description: This skill should be used when the user asks to create, redraw, or validate a professional diagram — architecture, system topology, flowchart, pipeline, sequence diagram, decision tree, state flow, or comparison (架构图 / 拓扑图 / 流程图 / 时序图 / 决策树). Accepts IR JSON, Markdown, or plain prose as input and renders one self-contained static SVG with automatic layout, light/dark theming, zero JavaScript, and 27 mechanical checks. Also converts Mermaid or prose into static SVG. Not for raster images or freeform artwork.
+version: 0.3.0
+description: This skill should be used when the user asks to create, redraw, or validate a professional diagram — architecture, system topology, flowchart, pipeline, sequence diagram, decision tree, state flow, or comparison (架构图 / 拓扑图 / 流程图 / 时序图 / 决策树). Accepts IR JSON, Markdown, or plain prose as input and renders one self-contained static SVG with automatic layout, light/dark theming, zero JavaScript, and 28 mechanical checks. Also converts Mermaid or prose into static SVG. Not for raster images or freeform artwork.
 agent_created: true
 ---
 
 # v2svg —— IR JSON → 静态 SVG 渲染 + 机械验证
 
-把「结构化图描述（IR JSON）」渲染为**可嵌入文档的静态 SVG**，并对构图质量做 27 项机械检查，产出机器可读回执。自动布局、零 JS、亮色优先 + `prefers-color-scheme: dark`（可用 `--theme light` 固定亮色、不跟随宿主主题）、单图通常 < 15 KB。
+把「结构化图描述（IR JSON）」渲染为**可嵌入文档的静态 SVG**，并对构图质量做 28 项机械检查，产出机器可读回执。自动布局、零 JS、亮色优先 + `prefers-color-scheme: dark`（可用 `--theme light` 固定亮色、不跟随宿主主题）、单图通常 < 15 KB。
 
 **本技能自包含**：只认 IR JSON，不依赖任何外部 skill 或业务语义。
 
@@ -67,7 +67,7 @@ svg render   <type> <input.json> <output.svg> [--quality standard|showcase] [--t
 ```
 
 - `<type>` ∈ `architecture` | `flow` | `sequence`，且必须与 IR 内 `type` 一致。
-- `--quality`：`standard` = 19 项（12 构图 + no_ascii + no_base64 + marker_contract + ref_reachable + svg_a11y + svg_hygiene）；`showcase` = 27 项全过。默认 `standard`。
+- `--quality`：`standard` = 20 项（13 构图 + no_ascii + no_base64 + marker_contract + ref_reachable + svg_a11y + svg_hygiene + content_within_canvas）；`showcase` = 28 项全过。默认 `standard`。
 - `--theme`：`follow` = 亮色优先 + `prefers-color-scheme` 宿主暗色自适应（**默认**，向后兼容）；`light` = **固定亮色、不跟随宿主主题**。图要进 PDF / 截图 / 印刷文档等「外观必须确定、不能随读者系统主题变」的场景用 `light`。`light` 的产物 **= `follow` 去掉暗色块**（逐字节相等，有回归测试固化）。
 - `--json`：回执以 JSON 输出（见 `references/diagram-contract.md`）；非 `--json` 为人类可读逐项结果。
 - validate 与 render **跑同一批检查**（validate 也先在内存渲染一份产物），故「validate 通过」等价于「render 会通过」。
@@ -84,14 +84,14 @@ svg render   <type> <input.json> <output.svg> [--quality standard|showcase] [--t
 
 - **产物路径**：`output.svg` 绝对路径；
 - **类型**：`type`；
-- **验证摘要**：档位 + `passed/total` + 失败项名（showcase 须 `27/27`）；
+- **验证摘要**：档位 + `passed/total` + 失败项名（showcase 须 `28/28`）；
 - **回执**：`--json` 时直接转发回执；非 `--json` 时总结 `ok` 与失败诊断。
 
 ## 参考文档
 
 - `references/design-system.md` —— **固定风格约定 + 可复制 fewshot**：域→role 配色映射、字级/线宽表、**字宽标定表与盒宽公式**、渲染级复核命令、文案规范、布局三原则、出图前自检 6 条。**写第一版 IR 前先读它**，能省掉大半返工。
 - `references/diagram-spec.md` —— IR 字段完整说明、`role` 三域语义、布局规则（含分带与列心漂移规律）、修复优先级。
-- `references/diagram-contract.md` —— Diagnostic / Check / 回执契约、27 项检查逐项说明、档位项数、文档口径断言、退出码表。
+- `references/diagram-contract.md` —— Diagnostic / Check / 回执契约、28 项检查逐项说明、档位项数、文档口径断言、退出码表。
 - `references/rendered-output-audit.md` —— **批量审计已渲染产物**：本管线产物的识别特征（并集口径，及 `class="node"` 为何是误报源）、IR 中缀清点、等价性比对（逐字节 `cmp` / 文本须拼接后比）、样式代际判定与四条审计纪律。要回答「这批 SVG 里哪些是本管线产物 / IR 是否齐备 / 是否仍一致 / 哪些是旧样式」时读它。
 
 ## 代码结构（改代码前先看）

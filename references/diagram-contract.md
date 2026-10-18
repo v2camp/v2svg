@@ -1,6 +1,6 @@
 # v2svg 诊断与回执契约
 
-Diagnostic 对象、Check 对象、27 项检查逐项说明、退出码表、回执 JSON schema。
+Diagnostic 对象、Check 对象、28 项检查逐项说明、退出码表、回执 JSON schema。
 
 ---
 
@@ -48,14 +48,14 @@ schema 层（`validateSchema`）产出的诊断。携带 `subject` / `evidence` 
 
 ---
 
-## 3. 27 项检查逐项说明
+## 3. 28 项检查逐项说明
 
-构图 12 项（8 项复用自研几何内核 `lib/geometry.mjs`，4 项为自研不变量）+ 文档集成专项 15 项。
+构图 13 项（8 项复用自研几何内核 `lib/geometry.mjs`，5 项为自研不变量）+ 文档集成专项 15 项。
 
 > 名清单的**唯一出处**是 `COMPOSITION_CHECK_NAMES` / `DOCUMENT_CHECK_NAMES` / `STANDARD_DOCUMENT_CHECK_NAMES`
 > （分别在两个 checks 模块里导出）。`svg doctor` 会断言本节各项数与代码一致。
 
-### 3.1 构图 12 项
+### 3.1 构图 13 项
 
 | 名称 | 检查什么 | 失败意味着 | 典型修法 |
 |:---|:---|:---|:---|
@@ -71,6 +71,7 @@ schema 层（`validateSchema`）产出的诊断。携带 `subject` / `evidence` 
 | `container_border_runs` | 无边贴容器边框长距离平行走 | 边贴框伪装边界 | 改路由离开边框 |
 | `route_rhythm` | 边转折节奏合理（无 <16px / <8px 过短段） | 路由抖动 | 删冗余边、加分组 |
 | `legend_clearance` | 图例不压任何 box/容器（gap≥8px） | 图例压节点 | 减节点或调 viewBox |
+| `portrait_strip` | 仅 `flow`：成品高宽比 ≤ 1.2，或节点 < 4；超出须 `meta.allowPortrait` ≥ 8 字理由 | 竖向长条嵌入竖排文档两侧留白过大 | 改 `layout: "horizontal"`（S 型折行）；确需纵向（决策树等层级语义）写豁免理由 |
 
 ### 3.2 文档集成专项 15 项
 
@@ -97,8 +98,8 @@ schema 层（`validateSchema`）产出的诊断。携带 `subject` / `evidence` 
 
 ### 3.3 档位 → 检查项数
 
-- `standard`：12 构图 + `no_ascii` + `no_base64` + `marker_contract` + `ref_reachable` + `svg_a11y` + `svg_hygiene` + `content_within_canvas` = **19 项**
-- `showcase`：27 项**全过**
+- `standard`：13 构图 + `no_ascii` + `no_base64` + `marker_contract` + `ref_reachable` + `svg_a11y` + `svg_hygiene` + `content_within_canvas` = **20 项**
+- `showcase`：28 项**全过**
 
 > **validate 与 render 跑的是同一批检查**：validate 也会先在内存里渲染一份产物，
 > 故「validate 通过」即等价于「render 会通过」。历史上 validate 不渲染，

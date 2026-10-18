@@ -182,6 +182,28 @@ export const cases = [
     },
   },
   {
+    name: 'portrait_strip：竖向长条拦截、横向/小图/豁免三态放行',
+    run() {
+      const mk = (n, metaExtra = {}, layoutMode) => ({
+        type: 'flow',
+        ...(layoutMode ? { layout: layoutMode } : {}),
+        meta: { title: 't', ...metaExtra },
+        nodes: Array.from({ length: n }, (_, i) => ({ id: `n${i}`, label: `步骤${i}`, role: 'capability' })),
+        edges: Array.from({ length: n - 1 }, (_, i) => ({ from: `n${i}`, to: `n${i + 1}` })),
+      });
+      const pick = (ir) => runCompositionChecks(ir, layout(ir), 'showcase').find((c) => c.name === 'portrait_strip');
+      const tall = pick(mk(5));
+      if (tall.ok) throw new Error(`竖向 5 节点链应被拦截：${tall.details.join('；')}`);
+      const wide = pick(mk(5, { viewBox: [1000, 720] }, 'horizontal'));
+      if (!wide.ok) throw new Error(`横向 5 节点链不应被拦截：${wide.details.join('；')}`);
+      const small = pick(mk(3));
+      if (!small.ok) throw new Error(`3 节点小图不应被拦截：${small.details.join('；')}`);
+      const exempt = pick(mk(5, { allowPortrait: '测试：确需强调纵深层级的竖向场景' }));
+      if (!exempt.ok) throw new Error(`已声明 allowPortrait 应放行：${exempt.details.join('；')}`);
+      return '拦截 1 · 放行 3（横向 / 小图 / 豁免）';
+    },
+  },
+  {
     name: 'role 集合闭合：theme 与 layout 图例同源',
     run() {
       const ir = readSample('order-system.architecture.json');

@@ -1,5 +1,16 @@
 # 更新日志
 
+## 0.3.0 - 2026-10-18
+
+### 新增：`portrait_strip` 检查——flow 竖向长条机械拦截（构图 12 → 13 项，standard 19 → 20，showcase 27 → 28）
+
+来源：课程文档复盘——竖向长条流程图嵌入竖排文档后两侧留白过大、破坏版面；「瘦高应改横向」此前只是约定，没有机械门禁。
+
+- **`lib/checks/composition.mjs` 新增第 13 项构图检查 `portrait_strip`**：仅 `flow` 类型；成品高宽比 > 1.2 且节点 ≥ 4 时失败，失败文案直接指向修法（改 `layout: "horizontal"`）；豁免走 `meta.allowPortrait` ≥ 8 字理由（与 `roleBudget` 同套声明机制）。阈值 1.2 来自全仓盘点分布：>1.2 的全是主链长条、≤1.05 的为近方形，两类干净分开。决策树等纵向层级语义不在横向折行能力域内（分支会被压成单链、边穿盒），属正当豁免场景——`samples/alert-triage.flow.json` 即改为声明豁免的活的样例。
+- **`schemas/common.schema.json`**：`meta.allowPortrait` 字段入契约（string，minLength 8）。
+- **文档口径同步**：`diagram-contract.md` §3/§3.1/§3.3、`diagram-spec.md` §6 修复优先级第 8 条、`design-system.md` §3 第 4 条量化判据、`README`/`SKILL`/`samples/README` 项数；`SKILL.md` standard 档顺带补回漏列的 `content_within_canvas`（计数原本就是含它的 19）。
+- 验证：`svg test` 50/50（新增四态用例：拦截 / 横向放行 / 小图放行 / 豁免放行）；`svg doctor` 通过；5 个样例 showcase 28/28（alert-triage 走豁免，产物逐字节不变）。
+
 ## 0.2.1 - 2026-10-18
 
 ### 修复：横排回边竖直段穿越无关盒

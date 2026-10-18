@@ -28,7 +28,7 @@ SVG 是**纯文本**，所以它天然对 LLM 友好（能读、能写、能改�
 | 一次性输出 | 画错没有诊断，只能整体重来 |
 | 风格漂移 | 每次生成一个样，跨文档、跨仓库都不一致 |
 
-v2svg 的做法是**让模型输出结构，而不是输出像素**，并在出图前**做 27 项机械检查**：
+v2svg 的做法是**让模型输出结构，而不是输出像素**，并在出图前**做 28 项机械检查**：
 
 ```
 自然语言 / 代码 / 文档片段
@@ -37,7 +37,7 @@ v2svg 的做法是**让模型输出结构，而不是输出像素**，并在出�
       ↓
   Schema 校验         ← 字段合法性
       ↓
-  机械检查（27 项）    ← 标签遮挡、连边穿越、走廊歧义、对比度、文字描边、箭头契约…
+  机械检查（28 项）    ← 标签遮挡、连边穿越、走廊歧义、对比度、文字描边、箭头契约…
       ↓
   静态 SVG            ← 单文件，直接贴进文档
 ```
@@ -263,7 +263,7 @@ svg render   <type> <input.json> <output.svg> [--quality standard|showcase] [--t
 ```
 
 - `<type>` ∈ `architecture` | `flow` | `sequence`
-- `--quality`：`standard` 19 项 / `showcase` 27 项（默认 `standard`）
+- `--quality`：`standard` 20 项 / `showcase` 28 项（默认 `standard`）
 - `--theme`：`follow`（默认）亮色优先 + 宿主暗色自适应；`light` **固定亮色、不跟随宿主主题**——用于图要进 PDF / 截图 / 印刷文档等外观必须确定的场景。`light` 产物 **= `follow` 去掉暗色块**（逐字节相等，`tests/invariants.test.mjs` 固化）。
 - `--json`：输出机器可读回执，含 `checks`、`composition.summary`、`artifact.sha256`
 - `validate` 与 `render` **跑同一批检查**（都会先渲染一份产物），故"validate 通过"等价于"render 会通过"
@@ -278,7 +278,7 @@ svg render   <type> <input.json> <output.svg> [--quality standard|showcase] [--t
 
 ### 质量门禁
 
-**构图检查 12 项** —— 坐标有限性、**声明实体覆盖**、节点重叠、文字锚点在盒内、文案截断、连线穿越无关节点、标签净空、
+**构图检查 13 项** —— 坐标有限性、**声明实体覆盖**、节点重叠、文字锚点在盒内、文案截断、连线穿越无关节点、标签净空、
 端点正交、走廊歧义、贴边借道、转折节奏、图例净空。
 
 **文档集成检查 15 项** —— ASCII 画图残留、base64 内嵌、文字描边污染、箭头 marker 契约、产物文字适配、**内容不越出画布**、
@@ -338,7 +338,7 @@ v2svg/
 │   ├── render.mjs               # 静态 SVG 渲染（不含裸数值，全部引用常量模块）
 │   ├── schema.mjs               # 运行时 schema 校验（JSON Schema 子集）
 │   └── checks/
-│       ├── composition.mjs      # 构图检查 12 项
+│       ├── composition.mjs      # 构图检查 13 项
 │       └── document.mjs         # 文档集成检查 15 项
 ├── schemas/{common,architecture,flow,sequence}.schema.json
 ├── tests/                       # 零依赖测试（svg test）
@@ -350,7 +350,7 @@ v2svg/
 └── references/
     ├── design-system.md         # 固定风格约定 + fewshot（域→role 配色、文案规范、自检）
     ├── diagram-spec.md          # IR 规范、role 语义、布局规则、修复优先级
-    └── diagram-contract.md      # 诊断 / 回执契约、27 项检查逐项说明
+    └── diagram-contract.md      # 诊断 / 回执契约、28 项检查逐项说明
 ```
 
 ---
