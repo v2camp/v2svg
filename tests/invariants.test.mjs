@@ -204,6 +204,121 @@ export const cases = [
     },
   },
   {
+    name: '横向折行边路由：邻接共享锚高 / 跳格与回边车道 / 非折回跨行车道 / 侧向通道',
+    run() {
+      const pick = (ir, name) => runCompositionChecks(ir, layout(ir), 'showcase').find((c) => c.name === name);
+      const assertOk = (ir, name) => {
+        const c = pick(ir, name);
+        if (!c.ok) throw new Error(`${name} 应通过：${c.details.join('；')}`);
+      };
+      const LONG = '这是一段足够长的节点标签文本会折成两行';
+      // ① 同行邻接混合盒高：边必须是共享锚高的两点直线（消 <16px 竖向台阶）。
+      const adj = {
+        type: 'flow', layout: 'horizontal', meta: { title: 't', viewBox: [1000, 720] },
+        nodes: [
+          { id: 'a', label: '短', role: 'capability' },
+          { id: 'b', label: LONG, role: 'capability' },
+          { id: 'c', label: '短二', role: 'capability' },
+        ],
+        edges: [
+          { from: 'a', to: 'b' },
+          { from: 'b', to: 'c' },
+        ],
+      };
+      const adjLr = layout(adj);
+      const ab = adjLr.edges.find((e) => e.from === 'a' && e.to === 'b');
+      const aBox = adjLr.boxes.find((b) => b.id === 'a');
+      const bBox = adjLr.boxes.find((b) => b.id === 'b');
+      if (aBox.height === bBox.height) throw new Error('前置：两盒高度应不同（单行 vs 双行标签）');
+      if (ab.points.length !== 2 || ab.points[0][1] !== ab.points[1][1]) {
+        throw new Error(`混合盒高邻接边应为水平直线：${JSON.stringify(ab.points)}`);
+      }
+      assertOk(adj, 'route_rhythm');
+      // ② 同行跳格 + 区间重叠双跳格：走行下通道、不穿盒、不共走廊。
+      const skip = {
+        type: 'flow', layout: 'horizontal', meta: { title: 't', viewBox: [1000, 720] },
+        nodes: ['a', 'b', 'c', 'd'].map((id) => ({ id, label: `节点${id}`, role: 'capability' })),
+        edges: [
+          { from: 'a', to: 'b' },
+          { from: 'b', to: 'c' },
+          { from: 'c', to: 'd' },
+          { from: 'a', to: 'c', label: '跳一' },
+          { from: 'b', to: 'd', label: '跳二' },
+        ],
+      };
+      const skipLr = layout(skip);
+      const ac = skipLr.edges.find((e) => e.from === 'a' && e.to === 'c');
+      if (ac.points.length < 4 || ac.fromSide !== 'bottom' || ac.toSide !== 'bottom') {
+        throw new Error(`跳格边应走行下通道（bottom→bottom 四点）：${JSON.stringify(ac.points)}`);
+      }
+      assertOk(skip, 'relationship_crossings');
+      assertOk(skip, 'relationship_corridors');
+      assertOk(skip, 'route_rhythm');
+      // ③ 跨行下行非折回对：首点必须落在源盒底缘、末点必须落在目标盒顶缘 x 跨度内。
+      const xdown = {
+        type: 'flow', layout: 'horizontal', meta: { title: 't', viewBox: [620, 720] },
+        nodes: [
+          { id: 'a', label: '源甲', role: 'capability' },
+          { id: 'b', label: '桥乙', role: 'capability' },
+          { id: 'c', label: '汇丙', role: 'capability' },
+          { id: 'd', label: '终丁', role: 'capability' },
+        ],
+        edges: [
+          { from: 'a', to: 'b' },
+          { from: 'b', to: 'c' },
+          { from: 'c', to: 'd' },
+          { from: 'a', to: 'd', label: '直达' },
+        ],
+      };
+      const xLr = layout(xdown);
+      const ad = xLr.edges.find((e) => e.from === 'a' && e.to === 'd');
+      const xa = xLr.boxes.find((b) => b.id === 'a');
+      const xd = xLr.boxes.find((b) => b.id === 'd');
+      if (xa.y === xd.y) throw new Error('前置：a 与 d 应跨行');
+      const first = ad.points[0];
+      const last = ad.points[ad.points.length - 1];
+      if (first[0] < xa.x || first[0] > xa.x + xa.width || first[1] !== xa.y + xa.height) {
+        throw new Error(`非折回跨行边首点应锚源盒底缘：${JSON.stringify(first)} vs ${JSON.stringify(xa)}`);
+      }
+      if (last[0] < xd.x || last[0] > xd.x + xd.width || last[1] !== xd.y) {
+        throw new Error(`非折回跨行边末点应锚目标盒顶缘跨度内：${JSON.stringify(last)} vs ${JSON.stringify(xd)}`);
+      }
+      assertOk(xdown, 'relationship_crossings');
+      assertOk(xdown, 'route_rhythm');
+      // ④ 跨行上行回边底侧封死 → 内侧/侧向通道：不穿盒、首末段垂直于声明 side。
+      // 注：viewBox 给足 1000 宽 —— 行折叠预算含尾部 H_GAP，长标签边会把 H_GAP 撑大，
+      // 窄画布下每行只装 1 盒退化成竖条（已入库图锁定该打包口径，此处不测打包只测路由）。
+      const upback = {
+        type: 'flow', layout: 'horizontal', meta: { title: 't', viewBox: [1000, 720] },
+        nodes: [
+          { id: 's', label: '起点', role: 'interaction' },
+          { id: 'k', label: '右一宽宽宽宽', role: 'capability' },
+          { id: 'g', label: '生成', role: 'capability' },
+          { id: 't2', label: '右二宽宽宽宽', role: 'capability' },
+          { id: 'v', label: '校验', role: 'control' },
+          { id: 't3', label: '右三宽宽宽宽', role: 'capability' },
+          { id: 'x', label: '落档宽宽宽', role: 'neutral' },
+        ],
+        edges: [
+          { from: 's', to: 'k' },
+          { from: 'k', to: 'g' },
+          { from: 'g', to: 't2' },
+          { from: 't2', to: 'v' },
+          { from: 'v', to: 't3' },
+          { from: 't3', to: 'x' },
+          { from: 'v', to: 'g', label: 'retry（≤2 次 · 带 reason）' },
+        ],
+      };
+      assertOk(upback, 'relationship_crossings');
+      assertOk(upback, 'orthogonal_arrows');
+      assertOk(upback, 'label_route_clearance');
+      const upLr = layout(upback);
+      const vg = upLr.edges.find((e) => e.from === 'v' && e.to === 'g');
+      if (vg.points.length < 4) throw new Error(`上行回边应绕通道（≥4 点）：${JSON.stringify(vg.points)}`);
+      return '邻接直线 · 跳格车道 · 跨行车道 · 上行回边通道 四类形态各自成立';
+    },
+  },
+  {
     name: 'role 集合闭合：theme 与 layout 图例同源',
     run() {
       const ir = readSample('order-system.architecture.json');

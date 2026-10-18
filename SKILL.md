@@ -1,6 +1,6 @@
 ---
 name: v2svg
-version: 0.3.0
+version: 0.3.1
 description: This skill should be used when the user asks to create, redraw, or validate a professional diagram — architecture, system topology, flowchart, pipeline, sequence diagram, decision tree, state flow, or comparison (架构图 / 拓扑图 / 流程图 / 时序图 / 决策树). Accepts IR JSON, Markdown, or plain prose as input and renders one self-contained static SVG with automatic layout, light/dark theming, zero JavaScript, and 28 mechanical checks. Also converts Mermaid or prose into static SVG. Not for raster images or freeform artwork.
 agent_created: true
 ---
